@@ -1,0 +1,58 @@
+CREATE TABLE Véhicules(
+immatriculation VARCHAR2 (30) CONSTRAINT pk_immatriculation  PRIMARY KEY,
+Ref_model VARCHAR2 (30)  NOT NULL ,
+Date_mise_circulation DATE NOT NULL,
+kilométrage NUMBER NOT NULL,
+Prix_demandé NUMBER NOT NULL
+);
+ALTER TABLE Véhicules ADD CONSTRAINT fk_Ref_model FOREIGN KEY (Ref_model) references Models(Ref_model) ;
+
+CREATE TABLE Models(
+Ref_model  VARCHAR2 (30) CONSTRAINT pk_Ref_model   PRIMARY KEY,
+Modele VARCHAR2 (30)  NOT NULL ,
+Marque VARCHAR2 (30) NOT NULL,
+Puissance VARCHAR2 (30) NOT NULL
+);
+
+CREATE TABLE Personnes(
+CIN  VARCHAR2 (15) CONSTRAINT pk1_CIN   PRIMARY KEY,
+Nom VARCHAR2 (30) CONSTRAINT ch1_nom CHECK (Nom in('^[a-zA-Z]+$'))  NOT NULL ,
+Prenom VARCHAR2 (30) NOT NULL,
+Email VARCHAR2 (50) CONSTRAINT ch122_Email CHECK (Email in('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'))  constraint un_email UNIQUE,
+Num_tel NUMBER CONSTRAINT ch1_Num_tel CHECK (Num_tel in('^[0-9]+$'))  NOT NULL
+);
+
+CREATE TABLE Acquisitions(
+immatriculation varchar2(30) references Véhicules (immatriculation ),
+CIN varchar2(30) references Personnes(CIN),
+Date_debut date,
+Date_fin date Not Null,
+Constraint PK_Aquisition primary key (immatriculation ,CIN),
+Constraint CDateF check( Date_fin > Date_debut)
+);
+
+Create table Contrat_ventes(
+Ref_contrat varchar2(30) ,
+Cin varchar2(30) ,
+Immatriculation varchar2(30),
+Date_vente date Default sysdate,
+Prix_vente number Not Null,
+Constraint FkContrat foreign key (Immatriculation,Cin) references Acquisitions (Immatriculation,Cin),
+Constraint PKContrat primary key (Ref_contrat,Immatriculation,Cin),
+Constraint CPrixV check (Prix_vente > 0)
+);
+
+alter table Models
+ADD constraint CKpuissance check( Puissance in ('4CH','5CH','6CH'));
+
+alter table Véhicules 
+ADD constraint CkPrix check( Prix_demandé between 1000 and 100000);
+
+ alter table Personnes
+ADD constraint CKNomPrenom check( Nom != Prenom);
+
+alter table Acquisitions
+Modify Date_debut Not Null ;
+
+alter table Véhicules 
+ADD Numero_Chassis varchar2(30) Not Null;
